@@ -21,3 +21,9 @@ npm run smoke
 ## Classification
 
 Ship as an MVP for local-first agent content review.
+
+## PR Checklist
+
+- Public repository created.
+- Main branch contains the initial MVP.
+- Release-candidate branch records verification commands.
