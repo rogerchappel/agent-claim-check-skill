@@ -1,0 +1,14 @@
+[
+  {
+    "id": "prd",
+    "title": "Product Requirements",
+    "url": "docs/PRD.md",
+    "text": "The project provides a reusable local agent skill that checks generated content for unsupported claims before publication. It emits markdown and JSON reports."
+  },
+  {
+    "id": "tests",
+    "title": "Package Scripts",
+    "url": "package.json",
+    "text": "The package includes fixture-backed tests and a smoke command."
+  }
+]
