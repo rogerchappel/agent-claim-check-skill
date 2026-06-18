@@ -1,0 +1,31 @@
+{
+  "name": "agent-claim-check-skill",
+  "version": "0.1.0",
+  "description": "Local-first agent skill for checking generated claims against supplied source bundles.",
+  "type": "module",
+  "bin": {
+    "agent-claim-check": "./bin/agent-claim-check.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check.js",
+    "smoke": "node bin/agent-claim-check.js --draft fixtures/draft.md --sources fixtures/sources.json --format markdown --fail-on missing"
+  },
+  "keywords": [
+    "agent-skill",
+    "claim-checking",
+    "content-review",
+    "local-first"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin",
+    "src",
+    "docs",
+    "SKILL.md",
+    "README.md"
+  ]
+}
