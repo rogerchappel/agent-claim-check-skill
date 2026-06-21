@@ -28,10 +28,15 @@
     "src",
     "docs",
     "SKILL.md",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rogerchappel/agent-claim-check-skill.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/agent-claim-check-skill/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/agent-claim-check-skill#readme"
 }

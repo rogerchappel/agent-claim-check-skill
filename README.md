@@ -10,6 +10,12 @@ npm run smoke
 node bin/agent-claim-check.js --draft fixtures/draft.md --sources fixtures/sources.json --format json
 ```
 
+## Install
+
+```bash
+npm install -g agent-claim-check-skill
+```
+
 ## Example
 
 ```bash
@@ -31,6 +37,18 @@ Source bundles are JSON arrays:
     "text": "The project provides a local CLI and fixture-backed tests."
   }
 ]
+```
+
+## Verify
+
+Run the release-readiness check before promoting the package:
+
+```bash
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
 ```
 
 ## Limitations
