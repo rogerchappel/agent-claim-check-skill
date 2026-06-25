@@ -51,6 +51,12 @@ npm run package:smoke
 npm run release:check
 ```
 
+## Package contents
+
+`npm run package:smoke` performs a dry-run pack and asserts that the tarball
+contains the CLI entrypoint, library source, `SKILL.md`, README, license, and
+the fixture pair used by the documented smoke command.
+
 ## Limitations
 
 The checker uses deterministic local heuristics rather than a live research model. It is designed for pre-publication triage and should be paired with human review for legal, medical, financial, or reputational claims.
