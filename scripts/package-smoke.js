@@ -13,7 +13,8 @@ const required = [
   "fixtures/sources.json",
   "SKILL.md",
   "README.md",
-  "LICENSE"
+  "LICENSE",
+  "SECURITY.md"
 ];
 
 const missing = required.filter((file) => !files.has(file));

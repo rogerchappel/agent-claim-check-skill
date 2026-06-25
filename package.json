@@ -30,7 +30,8 @@
     "docs",
     "SKILL.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md"
   ],
   "repository": {
     "type": "git",
