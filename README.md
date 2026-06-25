@@ -51,6 +51,9 @@ npm run package:smoke
 npm run release:check
 ```
 
+Pull requests and pushes to `main` run the same release gate in GitHub Actions
+on Node.js 20 and 22.
+
 ## Package contents
 
 `npm run package:smoke` performs a dry-run pack and asserts that the tarball
