@@ -1,6 +1,7 @@
 import fs from "node:fs";
 
 const required = [
+  ".github/workflows/ci.yml",
   "README.md",
   "SKILL.md",
   "docs/PRD.md",
