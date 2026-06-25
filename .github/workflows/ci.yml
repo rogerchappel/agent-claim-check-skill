@@ -1,36 +1,27 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
+  pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  release-readiness:
-    name: Release readiness
+  release-check:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install
 
-      - name: Run release checks
+      - name: Run release check
         run: npm run release:check
