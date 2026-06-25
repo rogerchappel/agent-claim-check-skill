@@ -58,7 +58,7 @@ on Node.js 20 and 22.
 
 `npm run package:smoke` performs a dry-run pack and asserts that the tarball
 contains the CLI entrypoint, library source, `SKILL.md`, README, license, and
-the fixture pair used by the documented smoke command.
+security policy, plus the fixture pair used by the documented smoke command.
 
 ## Limitations
 
