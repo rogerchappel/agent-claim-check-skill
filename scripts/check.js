@@ -26,4 +26,17 @@ if (!pkg.bin || !pkg.scripts?.smoke || !pkg.scripts?.test) {
   process.exit(1);
 }
 
+const files = new Set(pkg.files ?? []);
+for (const requiredFile of ["bin", "src", "fixtures", "SKILL.md", "README.md", "LICENSE"]) {
+  if (!files.has(requiredFile)) {
+    console.error(`package.json files must include ${requiredFile}.`);
+    process.exit(1);
+  }
+}
+
+if (pkg.scripts["package:smoke"] !== "node scripts/package-smoke.js") {
+  console.error("package:smoke must run scripts/package-smoke.js.");
+  process.exit(1);
+}
+
 console.log("check ok");
