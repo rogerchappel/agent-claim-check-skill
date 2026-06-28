@@ -31,7 +31,8 @@
     "SKILL.md",
     "README.md",
     "LICENSE",
-    "SECURITY.md"
+    "SECURITY.md",
+    "CONTRIBUTING.md"
   ],
   "repository": {
     "type": "git",
