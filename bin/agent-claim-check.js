@@ -1,5 +1,11 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { checkDraft, readSources, readText, renderJson, renderMarkdown, shouldFail } from "../src/index.js";
+
+function packageVersion() {
+  const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  return packageJson.version;
+}
 
 function parseArgs(argv) {
   const args = { format: "markdown", failOn: "" };
@@ -10,6 +16,7 @@ function parseArgs(argv) {
     else if (arg === "--format") args.format = argv[++index];
     else if (arg === "--fail-on") args.failOn = argv[++index];
     else if (arg === "--help" || arg === "-h") args.help = true;
+    else if (arg === "--version" || arg === "-v") args.version = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return args;
@@ -21,6 +28,10 @@ function usage() {
 
 try {
   const args = parseArgs(process.argv.slice(2));
+  if (args.version) {
+    process.stdout.write(`${packageVersion()}\n`);
+    process.exit(0);
+  }
   if (args.help) {
     process.stdout.write(usage());
     process.exit(0);

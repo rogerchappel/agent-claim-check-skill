@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { checkDraft, extractClaims, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
 
@@ -44,5 +46,13 @@ describe("checkDraft", () => {
     const report = checkDraft("The project emits JSON and markdown reports.", sources);
     assert.match(renderMarkdown(report), /Claim Check Report/);
     assert.match(renderMarkdown(report), /\| C1 \|/);
+  });
+});
+
+describe("cli", () => {
+  it("prints the package version", () => {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+    const output = execFileSync("node", ["bin/agent-claim-check.js", "--version"], { encoding: "utf8" });
+    assert.equal(output.trim(), packageJson.version);
   });
 });
