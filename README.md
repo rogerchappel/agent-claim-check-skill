@@ -60,6 +60,19 @@ on Node.js 20 and 22.
 contains the CLI entrypoint, library source, `SKILL.md`, README, license, and
 security policy, plus the fixture pair used by the documented smoke command.
 
+
+## Verification
+
+Run the local quality gates before opening a pull request:
+
+```sh
+npm run lint
+npm test
+npm run smoke
+```
+
+`npm run lint` is an alias for the repository static check so contributors can use the common npm workflow without guessing the project-specific command.
+
 ## Limitations
 
 The checker uses deterministic local heuristics rather than a live research model. It is designed for pre-publication triage and should be paired with human review for legal, medical, financial, or reputational claims.
