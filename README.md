@@ -7,6 +7,7 @@ Agent Claim Check Skill is a local-first CLI and library for reviewing generated
 ```bash
 npm test
 npm run smoke
+node bin/agent-claim-check.js --help
 node bin/agent-claim-check.js --draft fixtures/draft.md --sources fixtures/sources.json --format json
 ```
 
