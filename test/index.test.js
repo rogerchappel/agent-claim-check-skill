@@ -50,6 +50,13 @@ describe("checkDraft", () => {
 });
 
 describe("cli", () => {
+  it("prints usage help", () => {
+    const output = execFileSync("node", ["bin/agent-claim-check.js", "--help"], { encoding: "utf8" });
+    assert.match(output, /Usage: agent-claim-check/);
+    assert.match(output, /--draft <file>/);
+    assert.match(output, /--sources <file>/);
+  });
+
   it("prints the package version", () => {
     const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
     const output = execFileSync("node", ["bin/agent-claim-check.js", "--version"], { encoding: "utf8" });
