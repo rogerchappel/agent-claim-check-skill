@@ -12,6 +12,11 @@ npm run check
 npm run smoke
 ```
 
+Recorded on 2026-07-06:
+
+- `npm run release:check` passed locally, including static checks, 7 node:test cases, CLI help/version/fixture smoke, and package smoke.
+- Added a GitHub Actions release gate for pull requests and pushes to `main` on Node.js 20 and 22.
+
 ## Known Limits
 
 - Heuristic matching can miss paraphrases.
