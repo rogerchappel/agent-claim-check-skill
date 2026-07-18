@@ -24,6 +24,10 @@ describe("tokenize", () => {
   it("normalizes text into useful terms", () => {
     assert.deepEqual(tokenize("The local CLI reviews launch material."), ["local", "reviews", "launch", "material"]);
   });
+
+  it("normalizes hyphenated terms consistently", () => {
+    assert.deepEqual(tokenize("source-backed and source‑backed"), ["source", "backed", "source", "backed"]);
+  });
 });
 
 describe("checkDraft", () => {
@@ -34,6 +38,14 @@ describe("checkDraft", () => {
     );
     assert.equal(report.summary.supported, 1);
     assert.equal(report.summary.missing, 1);
+  });
+
+  it("matches hyphenated claim terms to spaced source terms", () => {
+    const report = checkDraft(
+      "The checker provides source-backed evidence for every generated launch claim.",
+      [{ id: "guide", text: "The checker provides source backed evidence for every generated launch claim." }]
+    );
+    assert.equal(report.summary.supported, 1);
   });
 
   it("supports fail-on thresholds", () => {

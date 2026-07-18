@@ -73,7 +73,8 @@ export function tokenize(text) {
   return text
     .toLowerCase()
     .replace(/https?:\/\/\S+/g, " ")
-    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/[-\u2010-\u2015]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .map((token) => token.trim())
     .filter((token) => token.length > 3)
