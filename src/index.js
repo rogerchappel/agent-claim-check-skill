@@ -32,6 +32,8 @@ const STOP_WORDS = new Set([
   "your"
 ]);
 
+const NEGATION_PATTERN = /\b(?:cannot|neither|never|no|nor|not|without)\b|\b\w+n['’]t\b/i;
+
 export function readText(path) {
   return fs.readFileSync(path, "utf8");
 }
@@ -81,8 +83,13 @@ export function tokenize(text) {
     .filter((token) => !STOP_WORDS.has(token));
 }
 
+function hasNegation(text) {
+  return NEGATION_PATTERN.test(text);
+}
+
 export function classifyClaim(claim, sources) {
   const claimTokens = new Set(tokenize(claim.text));
+  const claimHasNegation = hasNegation(claim.text);
   if (claimTokens.size === 0) {
     return {
       ...claim,
@@ -95,9 +102,15 @@ export function classifyClaim(claim, sources) {
 
   const matches = sources
     .map((source) => {
-      const sourceTokens = new Set(tokenize(`${source.title} ${source.text}`));
+      const sourceText = `${source.title ?? ""} ${source.text}`;
+      const sourceTokens = new Set(tokenize(sourceText));
       const overlap = [...claimTokens].filter((token) => sourceTokens.has(token));
-      return { source, overlap, score: overlap.length / claimTokens.size };
+      return {
+        source,
+        overlap,
+        score: overlap.length / claimTokens.size,
+        negationMismatch: claimHasNegation !== hasNegation(sourceText)
+      };
     })
     .filter((match) => match.overlap.length > 0)
     .sort((a, b) => b.score - a.score);
@@ -113,7 +126,12 @@ export function classifyClaim(claim, sources) {
     };
   }
 
-  const status = best.score >= 0.65 ? "supported" : best.score >= 0.35 ? "weak" : "missing";
+  const status =
+    best.score >= 0.65 && !best.negationMismatch
+      ? "supported"
+      : best.score >= 0.35
+        ? "weak"
+        : "missing";
   return {
     ...claim,
     status,
@@ -124,13 +142,17 @@ export function classifyClaim(claim, sources) {
       overlap: match.overlap
     })),
     reason:
-      status === "supported"
+      best.negationMismatch
+        ? "The claim and strongest evidence use opposite negation polarity."
+        : status === "supported"
         ? "The claim has strong lexical overlap with supplied evidence."
         : status === "weak"
           ? "The claim has partial evidence but may need narrower wording."
           : "Only minimal evidence overlap was found.",
     suggestion:
-      status === "supported"
+      best.negationMismatch
+        ? "Rewrite the claim to match the evidence or add evidence for the negated statement."
+        : status === "supported"
         ? "Keep the claim with a citation."
         : status === "weak"
           ? "Narrow the wording or cite the exact supporting source."

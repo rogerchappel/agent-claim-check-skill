@@ -48,6 +48,24 @@ describe("checkDraft", () => {
     assert.equal(report.summary.supported, 1);
   });
 
+  it("does not support a claim that directly negates its evidence", () => {
+    const report = checkDraft(
+      "The project does not provide a local CLI or fixture-backed tests.",
+      [{ id: "guide", text: "The project provides a local CLI and fixture-backed tests." }]
+    );
+    assert.equal(report.summary.supported, 0);
+    assert.equal(report.results[0].status, "weak");
+    assert.match(report.results[0].reason, /opposite negation polarity/);
+  });
+
+  it("supports a negated claim when its evidence has matching polarity", () => {
+    const report = checkDraft(
+      "The project does not publish posts automatically to every network.",
+      [{ id: "guide", text: "The project does not publish posts automatically to every network." }]
+    );
+    assert.equal(report.summary.supported, 1);
+  });
+
   it("supports fail-on thresholds", () => {
     const report = checkDraft("It publishes posts automatically to every network.", sources);
     assert.equal(shouldFail(report, "missing"), true);
