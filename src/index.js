@@ -87,6 +87,15 @@ function hasNegation(text) {
   return NEGATION_PATTERN.test(text);
 }
 
+function splitPassages(source) {
+  const passages = String(source.text)
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((passage) => passage.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const title = String(source.title ?? "").trim();
+  return title && title !== source.id ? [title, ...passages] : passages;
+}
+
 export function classifyClaim(claim, sources) {
   const claimTokens = new Set(tokenize(claim.text));
   const claimHasNegation = hasNegation(claim.text);
@@ -101,17 +110,19 @@ export function classifyClaim(claim, sources) {
   }
 
   const matches = sources
-    .map((source) => {
-      const sourceText = `${source.title ?? ""} ${source.text}`;
-      const sourceTokens = new Set(tokenize(sourceText));
-      const overlap = [...claimTokens].filter((token) => sourceTokens.has(token));
-      return {
-        source,
-        overlap,
-        score: overlap.length / claimTokens.size,
-        negationMismatch: claimHasNegation !== hasNegation(sourceText)
-      };
-    })
+    .flatMap((source) =>
+      splitPassages(source).map((passage) => {
+        const passageTokens = new Set(tokenize(passage));
+        const overlap = [...claimTokens].filter((token) => passageTokens.has(token));
+        return {
+          source,
+          passage,
+          overlap,
+          score: overlap.length / claimTokens.size,
+          negationMismatch: claimHasNegation !== hasNegation(passage)
+        };
+      })
+    )
     .filter((match) => match.overlap.length > 0)
     .sort((a, b) => b.score - a.score);
 
@@ -139,11 +150,12 @@ export function classifyClaim(claim, sources) {
       id: match.source.id,
       title: match.source.title,
       url: match.source.url,
+      passage: match.passage,
       overlap: match.overlap
     })),
     reason:
       best.negationMismatch
-        ? "The claim and strongest evidence use opposite negation polarity."
+        ? "The claim and strongest matched passage use opposite negation polarity."
         : status === "supported"
         ? "The claim has strong lexical overlap with supplied evidence."
         : status === "weak"
