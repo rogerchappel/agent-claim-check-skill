@@ -76,7 +76,19 @@ npm run smoke
 
 ## Limitations
 
-The checker uses deterministic local heuristics rather than a live research model. It is designed for pre-publication triage and should be paired with human review for legal, medical, financial, or reputational claims.
+The checker uses deterministic local heuristics rather than a live research
+model. It splits each source into sentence-like passages, ranks those passages
+by lexical overlap, and compares negation polarity only with the best-matching
+passage. JSON evidence includes that passage in the `passage` field so callers
+can show what was actually matched.
+
+This polarity check recognizes common English negators such as `not`, `never`,
+`without`, and contractions ending in `n't`. It does not parse grammar, resolve
+pronouns, understand double negatives, or determine whether similarly worded
+statements have the same meaning. Sentence splitting is punctuation-based, so
+abbreviations and unusual formatting can produce imperfect passages. Treat the
+result as pre-publication triage and use human review for legal, medical,
+financial, or reputational claims.
 
 ## Safety Notes
 
