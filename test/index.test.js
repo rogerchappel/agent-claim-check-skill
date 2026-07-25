@@ -66,6 +66,47 @@ describe("checkDraft", () => {
     assert.equal(report.summary.supported, 1);
   });
 
+  it("ignores unrelated negation outside the matched passage", () => {
+    const report = checkDraft(
+      "The feature supports exports.",
+      [{ id: "guide", text: "The feature supports exports. It does not publish files." }]
+    );
+    assert.equal(report.results[0].status, "supported");
+    assert.equal(report.results[0].evidence[0].passage, "The feature supports exports.");
+  });
+
+  it("reports the locally matched negated passage", () => {
+    const report = checkDraft(
+      "The feature does not publish files.",
+      [{ id: "guide", text: "The feature supports exports. The feature does not publish files." }]
+    );
+    assert.equal(report.results[0].status, "supported");
+    assert.equal(report.results[0].evidence[0].passage, "The feature does not publish files.");
+  });
+
+  it("detects a polarity contradiction in the matched passage", () => {
+    const report = checkDraft(
+      "The feature does not support exports.",
+      [{ id: "guide", text: "The feature supports exports. It does not publish files." }]
+    );
+    assert.equal(report.results[0].status, "weak");
+    assert.match(report.results[0].reason, /matched passage.*opposite negation polarity/);
+    assert.equal(report.results[0].evidence[0].passage, "The feature supports exports.");
+  });
+
+  it("selects the strongest local passage across sources", () => {
+    const report = checkDraft(
+      "The feature supports CSV exports.",
+      [
+        { id: "overview", text: "The feature supports reports. CSV files are not published." },
+        { id: "exports", text: "The feature supports CSV exports. Publishing remains manual." }
+      ]
+    );
+    assert.equal(report.results[0].status, "supported");
+    assert.equal(report.results[0].evidence[0].id, "exports");
+    assert.equal(report.results[0].evidence[0].passage, "The feature supports CSV exports.");
+  });
+
   it("supports fail-on thresholds", () => {
     const report = checkDraft("It publishes posts automatically to every network.", sources);
     assert.equal(shouldFail(report, "missing"), true);
