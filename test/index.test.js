@@ -107,6 +107,50 @@ describe("checkDraft", () => {
     assert.equal(report.results[0].evidence[0].passage, "The feature supports CSV exports.");
   });
 
+  for (const claim of [
+    "The feature does support CSV exports.",
+    "The feature does not support CSV exports."
+  ]) {
+    it(`prefers matching polarity for tied passages regardless of source order: ${claim}`, () => {
+      const positive = { id: "positive", text: "The feature does support CSV exports." };
+      const negative = { id: "negative", text: "The feature does not support CSV exports." };
+      const matchingId = claim.includes("does not") ? "negative" : "positive";
+
+      for (const orderedSources of [[positive, negative], [negative, positive]]) {
+        const report = checkDraft(claim, orderedSources);
+        assert.equal(report.results[0].status, "supported");
+        assert.equal(report.results[0].evidence[0].id, matchingId);
+        assert.equal(report.results[0].evidence[0].passage, orderedSources.find(({ id }) => id === matchingId).text);
+        assert.match(report.results[0].reason, /strong lexical overlap/);
+      }
+    });
+  }
+
+  it("retains contradiction reporting when an opposite-polarity passage scores higher", () => {
+    const report = checkDraft(
+      "The feature does not support CSV archive exports.",
+      [
+        { id: "matching", text: "The feature does not support CSV exports." },
+        { id: "stronger", text: "The feature does support CSV archive exports." }
+      ]
+    );
+
+    assert.equal(report.results[0].status, "weak");
+    assert.equal(report.results[0].evidence[0].id, "stronger");
+    assert.equal(report.results[0].evidence[0].passage, "The feature does support CSV archive exports.");
+    assert.match(report.results[0].reason, /opposite negation polarity/);
+  });
+
+  it("orders otherwise tied evidence deterministically", () => {
+    const alpha = { id: "alpha", text: "The feature supports CSV exports." };
+    const zulu = { id: "zulu", text: "The feature supports CSV exports." };
+
+    for (const orderedSources of [[zulu, alpha], [alpha, zulu]]) {
+      const report = checkDraft("The feature supports CSV exports.", orderedSources);
+      assert.deepEqual(report.results[0].evidence.map(({ id }) => id), ["alpha", "zulu"]);
+    }
+  });
+
   it("supports fail-on thresholds", () => {
     const report = checkDraft("It publishes posts automatically to every network.", sources);
     assert.equal(shouldFail(report, "missing"), true);
