@@ -78,9 +78,13 @@ npm run smoke
 
 The checker uses deterministic local heuristics rather than a live research
 model. It splits each source into sentence-like passages, ranks those passages
-by lexical overlap, and compares negation polarity only with the best-matching
-passage. JSON evidence includes that passage in the `passage` field so callers
-can show what was actually matched.
+by lexical overlap, and uses matching negation polarity to break equal-score
+ties. Remaining ties use source and passage text for deterministic evidence
+ordering, independent of source bundle order. A higher-scoring passage still
+wins even when its polarity differs, so the checker reports a contradiction
+when no equally strong matching-polarity evidence exists. JSON evidence begins
+with the selected passage in the `passage` field so callers can show what was
+actually matched.
 
 This polarity check recognizes common English negators such as `not`, `never`,
 `without`, and contractions ending in `n't`. It does not parse grammar, resolve

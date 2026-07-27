@@ -96,6 +96,21 @@ function splitPassages(source) {
   return title && title !== source.id ? [title, ...passages] : passages;
 }
 
+function compareText(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function compareMatches(left, right) {
+  return (
+    right.score - left.score ||
+    Number(left.negationMismatch) - Number(right.negationMismatch) ||
+    compareText(left.source.id, right.source.id) ||
+    compareText(left.passage, right.passage) ||
+    compareText(left.source.title, right.source.title) ||
+    compareText(left.source.url, right.source.url)
+  );
+}
+
 export function classifyClaim(claim, sources) {
   const claimTokens = new Set(tokenize(claim.text));
   const claimHasNegation = hasNegation(claim.text);
@@ -124,7 +139,7 @@ export function classifyClaim(claim, sources) {
       })
     )
     .filter((match) => match.overlap.length > 0)
-    .sort((a, b) => b.score - a.score);
+    .sort(compareMatches);
 
   const best = matches[0];
   if (!best) {
