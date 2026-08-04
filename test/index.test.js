@@ -184,11 +184,7 @@ describe("cli", () => {
 
   for (const option of ["--draft", "--sources", "--format", "--fail-on"]) {
     it(`rejects a repeated ${option} before reading files`, () => {
-      const result = runCli([
-        "--draft", "does-not-exist.md",
-        "--sources", "does-not-exist.json",
-        option, "another-value"
-      ]);
+      const result = runCli([option, "does-not-exist", option, "another-value"]);
 
       assert.equal(result.status, 1);
       assert.match(result.stderr, new RegExp(`Option ${option} may only be specified once\\.`));

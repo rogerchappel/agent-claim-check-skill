@@ -9,15 +9,33 @@ function packageVersion() {
 
 function parseArgs(argv) {
   const args = { format: "markdown", failOn: "" };
+  const seen = new Set();
+  const valueOptions = {
+    "--draft": "draft",
+    "--sources": "sources",
+    "--format": "format",
+    "--fail-on": "failOn"
+  };
+
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
-    if (arg === "--draft") args.draft = argv[++index];
-    else if (arg === "--sources") args.sources = argv[++index];
-    else if (arg === "--format") args.format = argv[++index];
-    else if (arg === "--fail-on") args.failOn = argv[++index];
-    else if (arg === "--help" || arg === "-h") args.help = true;
-    else if (arg === "--version" || arg === "-v") args.version = true;
-    else throw new Error(`Unknown argument: ${arg}`);
+    const property = valueOptions[arg];
+    if (property) {
+      if (seen.has(arg)) throw new Error(`Option ${arg} may only be specified once.`);
+      const value = argv[index + 1];
+      if (!value || value.startsWith("-")) throw new Error(`Option ${arg} requires a value.`);
+      seen.add(arg);
+      args[property] = value;
+      index += 1;
+    } else if (arg === "--help" || arg === "-h") {
+      if (argv.length !== 1) throw new Error(`Option ${arg} must be used alone.`);
+      args.help = true;
+    } else if (arg === "--version" || arg === "-v") {
+      if (argv.length !== 1) throw new Error(`Option ${arg} must be used alone.`);
+      args.version = true;
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
   }
   return args;
 }
