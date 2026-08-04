@@ -27,6 +27,13 @@ agent-claim-check \
   --fail-on missing
 ```
 
+`--draft` and `--sources` are required. Each value-taking option (`--draft`,
+`--sources`, `--format`, and `--fail-on`) may be supplied only once and must be
+followed by a value, not another flag. `--help`/`-h` and `--version`/`-v` are
+standalone commands and cannot be mixed with operational options. Invalid CLI
+usage exits with status 1; a report matching the selected `--fail-on`
+threshold exits with status 2.
+
 Source bundles are JSON arrays:
 
 ```json

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { checkDraft, extractClaims, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
@@ -165,6 +165,10 @@ describe("checkDraft", () => {
 });
 
 describe("cli", () => {
+  function runCli(args) {
+    return spawnSync("node", ["bin/agent-claim-check.js", ...args], { encoding: "utf8" });
+  }
+
   it("prints usage help", () => {
     const output = execFileSync("node", ["bin/agent-claim-check.js", "--help"], { encoding: "utf8" });
     assert.match(output, /Usage: agent-claim-check/);
@@ -176,5 +180,50 @@ describe("cli", () => {
     const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
     const output = execFileSync("node", ["bin/agent-claim-check.js", "--version"], { encoding: "utf8" });
     assert.equal(output.trim(), packageJson.version);
+  });
+
+  for (const option of ["--draft", "--sources", "--format", "--fail-on"]) {
+    it(`rejects a repeated ${option} before reading files`, () => {
+      const result = runCli([option, "does-not-exist", option, "another-value"]);
+
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, new RegExp(`Option ${option} may only be specified once\\.`));
+      assert.doesNotMatch(result.stderr, /ENOENT/);
+    });
+
+    it(`reports a missing value for ${option}`, () => {
+      const result = runCli([option]);
+
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, new RegExp(`Option ${option} requires a value\\.`));
+    });
+
+    it(`does not consume another flag as the value for ${option}`, () => {
+      const result = runCli([option, "--help"]);
+
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, new RegExp(`Option ${option} requires a value\\.`));
+    });
+  }
+
+  for (const option of ["--help", "-h", "--version", "-v"]) {
+    it(`requires ${option} to be used alone`, () => {
+      const result = runCli([option, "--draft", "does-not-exist.md"]);
+
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, new RegExp(`Option ${option} must be used alone\\.`));
+      assert.doesNotMatch(result.stderr, /ENOENT/);
+    });
+  }
+
+  it("preserves exit code 2 for a matched fail-on threshold", () => {
+    const result = runCli([
+      "--draft", "fixtures/draft.md",
+      "--sources", "fixtures/sources.json",
+      "--fail-on", "missing"
+    ]);
+
+    assert.equal(result.status, 2);
+    assert.equal(result.stderr, "");
   });
 });
