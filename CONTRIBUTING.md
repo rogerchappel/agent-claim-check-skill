@@ -5,7 +5,7 @@ Thanks for helping improve `agent-claim-check-skill`.
 ## Development
 
 ```bash
-npm install
+npm ci
 npm run release:check
 ```
 
