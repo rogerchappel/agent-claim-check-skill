@@ -18,6 +18,56 @@ describe("claim extraction", () => {
     assert.equal(claims.length, 1);
     assert.equal(claims[0].id, "C1");
   });
+
+  it("extracts consecutive unordered list items as separate claims", () => {
+    const claims = extractClaims(`
+- The tool emits detailed JSON reports for automated review
+- The tool emits readable Markdown reports for human review
+- The tool runs entirely locally without publishing draft content
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The tool emits detailed JSON reports for automated review",
+      "The tool emits readable Markdown reports for human review",
+      "The tool runs entirely locally without publishing draft content"
+    ]);
+  });
+
+  it("extracts ordered list items and preserves multiline item text", () => {
+    const claims = extractClaims(`
+1. The checker reads source bundles from local JSON files
+   before it evaluates draft claims
+2) The checker returns deterministic evidence ordering for
+   repeatable automated review
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker reads source bundles from local JSON files before it evaluates draft claims",
+      "The checker returns deterministic evidence ordering for repeatable automated review"
+    ]);
+  });
+
+  it("keeps prose and list claims separate while excluding code", () => {
+    const claims = extractClaims(`
+The checker reviews generated drafts against supplied source bundles.
+
+- Inline \`npm run smoke\` commands are excluded from extracted claim text
+- Fenced examples are also excluded from claim extraction
+
+\`\`\`markdown
+- This example list item must not become a claim candidate
+\`\`\`
+
+Reviewers receive a compact report for editorial triage.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker reviews generated drafts against supplied source bundles.",
+      "Inline commands are excluded from extracted claim text",
+      "Fenced examples are also excluded from claim extraction",
+      "Reviewers receive a compact report for editorial triage."
+    ]);
+  });
 });
 
 describe("tokenize", () => {
