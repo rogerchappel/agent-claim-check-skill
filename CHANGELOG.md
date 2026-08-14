@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Extract ordered and unordered Markdown list items as separate claim candidates.
 - Add release-readiness checks for package metadata, pack contents, and CI verification.
 - Prefer matching negation polarity when passages have equal lexical scores, with deterministic evidence ordering.
 All notable changes to this project will be documented in this file.

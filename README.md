@@ -34,6 +34,11 @@ standalone commands and cannot be mixed with operational options. Invalid CLI
 usage exits with status 1; a report matching the selected `--fail-on`
 threshold exits with status 2.
 
+Drafts may use ordinary Markdown prose, headings, and ordered or unordered
+lists. Each list item is treated as a separate claim candidate, including an
+item that continues across multiple lines. Prose remains sentence-based.
+Fenced code blocks and inline code are excluded from claim extraction.
+
 Source bundles are JSON arrays:
 
 ```json
