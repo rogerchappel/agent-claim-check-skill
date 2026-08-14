@@ -64,6 +64,7 @@ export function extractClaims(markdown) {
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]+`/g, " ")
     .replace(/^#+\s+/gm, "")
+    .replace(/^[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])[ \t]+/gm, "\n\n")
     .split(/(?<=[.!?])\s+|\n{2,}/)
     .map((sentence) => sentence.replace(/\s+/g, " ").trim())
     .filter((sentence) => sentence.length >= 24)
