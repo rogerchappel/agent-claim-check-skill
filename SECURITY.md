@@ -2,8 +2,8 @@
 
 ## Supported Versions
 
-Security fixes are handled on the latest `main` branch and the most recent npm
-package version.
+Security fixes are handled on the latest `main` branch. The project has not yet
+published a package to the npm registry.
 
 ## Reporting a Vulnerability
 

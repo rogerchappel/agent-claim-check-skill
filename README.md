@@ -14,8 +14,11 @@ node bin/agent-claim-check.js --draft fixtures/draft.md --sources fixtures/sourc
 ## Install
 
 ```bash
-npm install -g agent-claim-check-skill
+npm install --global github:rogerchappel/agent-claim-check-skill
 ```
+
+The project is currently distributed from this GitHub repository and has not
+yet been published to the npm registry.
 
 ## Example
 
@@ -69,9 +72,11 @@ on Node.js 20 and 22.
 
 ## Package contents
 
-`npm run package:smoke` performs a dry-run pack and asserts that the tarball
+`npm run package:smoke` performs a dry-run pack, asserts that the tarball
 contains the CLI entrypoint, library source, `SKILL.md`, README, license, and
-security policy, plus the fixture pair used by the documented smoke command.
+security policy, and then runs the documented GitHub install from a clean
+temporary directory and invokes the installed CLI with `--help` and
+`--version`.
 
 
 ## Verification
