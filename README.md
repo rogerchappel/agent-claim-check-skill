@@ -34,8 +34,11 @@ agent-claim-check \
 `--sources`, `--format`, and `--fail-on`) may be supplied only once and must be
 followed by a value, not another flag. `--help`/`-h` and `--version`/`-v` are
 standalone commands and cannot be mixed with operational options. Invalid CLI
-usage exits with status 1; a report matching the selected `--fail-on`
-threshold exits with status 2.
+usage exits with status 1. `--format` accepts only `markdown` or `json`, while
+`--fail-on` may be omitted or set to `weak`, `missing`, or `unverifiable`.
+These option values are validated before either input file is read, and invalid
+usage produces only an actionable error and usage text on stderr. A report
+matching a valid selected `--fail-on` threshold exits with status 2.
 
 Drafts may use ordinary Markdown prose, headings, and ordered or unordered
 lists. Each list item is treated as a separate claim candidate, including an
