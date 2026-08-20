@@ -266,6 +266,38 @@ describe("cli", () => {
     });
   }
 
+  for (const format of ["yaml", "MARKDOWN"]) {
+    it(`rejects invalid --format value ${JSON.stringify(format)} before reading files`, () => {
+      const result = runCli([
+        "--draft", "does-not-exist.md",
+        "--sources", "also-missing.json",
+        "--format", format
+      ]);
+
+      assert.equal(result.status, 1);
+      assert.equal(result.stdout, "");
+      assert.match(result.stderr, /Invalid value for --format: .*Expected markdown or json\./);
+      assert.match(result.stderr, /Usage: agent-claim-check/);
+      assert.doesNotMatch(result.stderr, /ENOENT/);
+    });
+  }
+
+  for (const policy of ["typo", "supported", "WEAK"]) {
+    it(`rejects invalid --fail-on value ${JSON.stringify(policy)} before reading files`, () => {
+      const result = runCli([
+        "--draft", "does-not-exist.md",
+        "--sources", "also-missing.json",
+        "--fail-on", policy
+      ]);
+
+      assert.equal(result.status, 1);
+      assert.equal(result.stdout, "");
+      assert.match(result.stderr, /Invalid value for --fail-on: .*Expected weak, missing, or unverifiable\./);
+      assert.match(result.stderr, /Usage: agent-claim-check/);
+      assert.doesNotMatch(result.stderr, /ENOENT/);
+    });
+  }
+
   it("preserves exit code 2 for a matched fail-on threshold", () => {
     const result = runCli([
       "--draft", "fixtures/draft.md",
