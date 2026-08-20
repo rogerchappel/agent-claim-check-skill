@@ -44,6 +44,15 @@ function usage() {
   return `Usage: agent-claim-check --draft <file> --sources <file> [--format markdown|json] [--fail-on weak|missing|unverifiable]\n`;
 }
 
+function validateArgs(args) {
+  if (!new Set(["markdown", "json"]).has(args.format)) {
+    throw new Error(`Invalid value for --format: ${args.format}. Expected markdown or json.`);
+  }
+  if (!new Set(["", "weak", "missing", "unverifiable"]).has(args.failOn)) {
+    throw new Error(`Invalid value for --fail-on: ${args.failOn}. Expected weak, missing, or unverifiable.`);
+  }
+}
+
 try {
   const args = parseArgs(process.argv.slice(2));
   if (args.version) {
@@ -54,13 +63,13 @@ try {
     process.stdout.write(usage());
     process.exit(0);
   }
+  validateArgs(args);
   if (!args.draft || !args.sources) {
     throw new Error("Both --draft and --sources are required.");
   }
   const report = checkDraft(readText(args.draft), readSources(args.sources));
   if (args.format === "json") process.stdout.write(renderJson(report));
-  else if (args.format === "markdown") process.stdout.write(renderMarkdown(report));
-  else throw new Error(`Unknown format: ${args.format}`);
+  else process.stdout.write(renderMarkdown(report));
   process.exit(shouldFail(report, args.failOn) ? 2 : 0);
 } catch (error) {
   process.stderr.write(`${error.message}\n${usage()}`);
