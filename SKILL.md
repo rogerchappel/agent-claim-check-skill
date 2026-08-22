@@ -7,7 +7,8 @@ Use this skill when an agent has drafted public-facing or decision-informing tex
 ## Required Inputs
 
 - Draft markdown or plain text.
-- Source bundle JSON with `id`, `title`, `text`, and optional `url`.
+- Source bundle JSON array whose entries have a unique, non-blank string `id`,
+  a non-blank string `text`, and optional string `title` and `url` fields.
 - Optional strictness policy such as `missing`, `weak`, or `unverifiable`.
 
 ## Side-Effect Boundaries
@@ -21,10 +22,12 @@ No approval is needed for local analysis. Explicit user approval is required bef
 ## Workflow
 
 1. Collect the exact draft and source bundle.
-2. Run the CLI with markdown output for human review.
-3. Treat `missing` claims as blockers for publication.
-4. Rewrite weak claims with narrower language or add source evidence.
-5. Re-run the checker before handing off the draft.
+2. Validate that source IDs are unique and that every source follows the strict
+   string-field contract; the CLI rejects the whole bundle before classification.
+3. Run the CLI with markdown output for human review.
+4. Treat `missing` claims as blockers for publication.
+5. Rewrite weak claims with narrower language or add source evidence.
+6. Re-run the checker before handing off the draft.
 
 ## Examples
 
