@@ -58,6 +58,12 @@ Source bundles are JSON arrays:
 ]
 ```
 
+Each array entry must be an object with a unique, non-blank string `id` and a
+non-blank string `text`. Optional `title` and `url` fields must be strings when
+present; an omitted or blank title defaults to the source ID, and an omitted or
+blank URL defaults to an empty string. Invalid entries are rejected before any
+claims are classified, with the zero-based source index and field in the error.
+
 ## Verify
 
 Run the release-readiness check before promoting the package:
