@@ -43,18 +43,30 @@ export function readSources(path) {
   if (!Array.isArray(parsed)) {
     throw new Error("Source bundle must be a JSON array.");
   }
+  const ids = new Set();
   return parsed.map((source, index) => {
-    if (!source || typeof source !== "object") {
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
       throw new Error(`Source ${index} must be an object.`);
     }
-    if (!source.id || !source.text) {
-      throw new Error(`Source ${index} must include id and text.`);
+    for (const field of ["id", "text"]) {
+      if (typeof source[field] !== "string" || source[field].trim() === "") {
+        throw new Error(`Source ${index} field ${field} must be a non-blank string.`);
+      }
     }
+    for (const field of ["title", "url"]) {
+      if (source[field] !== undefined && typeof source[field] !== "string") {
+        throw new Error(`Source ${index} field ${field} must be a string when provided.`);
+      }
+    }
+    if (ids.has(source.id)) {
+      throw new Error(`Source ${index} field id duplicates source id ${JSON.stringify(source.id)}.`);
+    }
+    ids.add(source.id);
     return {
-      id: String(source.id),
-      title: source.title ? String(source.title) : String(source.id),
-      url: source.url ? String(source.url) : "",
-      text: String(source.text)
+      id: source.id,
+      title: source.title || source.id,
+      url: source.url || "",
+      text: source.text
     };
   });
 }

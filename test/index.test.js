@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { checkDraft, extractClaims, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
+import { checkDraft, extractClaims, readSources, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
 
 const sources = [
   {
@@ -11,6 +13,40 @@ const sources = [
     text: "The project provides a local CLI and fixture-backed tests for reviewing generated launch material. It emits JSON and markdown reports."
   }
 ];
+
+function withSourceBundle(value, callback) {
+  const directory = mkdtempSync(join(tmpdir(), "agent-claim-check-test-"));
+  const path = join(directory, "sources.json");
+  writeFileSync(path, JSON.stringify(value));
+  try {
+    return callback(path);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+describe("source bundles", () => {
+  it("accepts the documented source shape and applies optional defaults", () => {
+    withSourceBundle([{ id: "guide", text: "Supported evidence text." }], (path) => {
+      assert.deepEqual(readSources(path), [{ id: "guide", title: "guide", url: "", text: "Supported evidence text." }]);
+    });
+  });
+
+  for (const { value, message } of [
+    { value: [null], message: "Source 0 must be an object." },
+    { value: [[]], message: "Source 0 must be an object." },
+    { value: [{}], message: "Source 0 field id must be a non-blank string." },
+    { value: [{ id: " ", text: "evidence" }], message: "Source 0 field id must be a non-blank string." },
+    { value: [{ id: "guide", text: { value: "evidence" } }], message: "Source 0 field text must be a non-blank string." },
+    { value: [{ id: "guide", text: "evidence", title: 7 }], message: "Source 0 field title must be a string when provided." },
+    { value: [{ id: "guide", text: "evidence", url: false }], message: "Source 0 field url must be a string when provided." },
+    { value: [{ id: "dup", text: "first" }, { id: "dup", text: "second" }], message: 'Source 1 field id duplicates source id "dup".' }
+  ]) {
+    it(`rejects malformed input with ${message}`, () => {
+      withSourceBundle(value, (path) => assert.throws(() => readSources(path), { message }));
+    });
+  }
+});
 
 describe("claim extraction", () => {
   it("extracts prose claims and skips short fragments", () => {
@@ -217,6 +253,28 @@ describe("checkDraft", () => {
 describe("cli", () => {
   function runCli(args) {
     return spawnSync("node", ["bin/agent-claim-check.js", ...args], { encoding: "utf8" });
+  }
+
+  for (const { sources: invalidSources, message } of [
+    { sources: [{ id: "guide", text: { claim: "object evidence" } }], message: "Source 0 field text must be a non-blank string." },
+    { sources: [{ id: "dup", text: "first evidence" }, { id: "dup", text: "second evidence" }], message: 'Source 1 field id duplicates source id "dup".' }
+  ]) {
+    it(`rejects an invalid bundle without emitting a report: ${message}`, () => {
+      const directory = mkdtempSync(join(tmpdir(), "agent-claim-check-cli-"));
+      const draft = join(directory, "draft.md");
+      const sourcePath = join(directory, "sources.json");
+      writeFileSync(draft, "The project provides object evidence for generated claims.");
+      writeFileSync(sourcePath, JSON.stringify(invalidSources));
+      try {
+        const result = runCli(["--draft", draft, "--sources", sourcePath, "--format", "json"]);
+        assert.equal(result.status, 1);
+        assert.equal(result.stdout, "");
+        assert.match(result.stderr, new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+        assert.doesNotMatch(result.stderr, /\[object Object\]/);
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    });
   }
 
   it("prints usage help", () => {
