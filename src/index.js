@@ -75,7 +75,7 @@ export function extractClaims(markdown) {
   return markdown
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]+`/g, " ")
-    .replace(/^#+\s+/gm, "")
+    .replace(/^[ \t]{0,3}#{1,6}(?:[ \t]+.*|[ \t]*)$/gm, "\n\n")
     .replace(/^[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])[ \t]+/gm, "\n\n")
     .split(/(?<=[.!?])\s+|\n{2,}/)
     .map((sentence) => sentence.replace(/\s+/g, " ").trim())
@@ -202,7 +202,16 @@ export function classifyClaim(claim, sources) {
 
 export function checkDraft(markdown, sources) {
   const claims = extractClaims(markdown);
-  const results = claims.map((claim) => classifyClaim(claim, sources));
+  const results = claims.length
+    ? claims.map((claim) => classifyClaim(claim, sources))
+    : [{
+        id: "C0",
+        text: "No verifiable claims were extracted from the draft.",
+        status: "unverifiable",
+        evidence: [],
+        reason: "The draft did not contain any claim candidates.",
+        suggestion: "Add at least one concrete, source-backed prose or list claim."
+      }];
   const summary = results.reduce(
     (counts, result) => {
       counts[result.status] += 1;
