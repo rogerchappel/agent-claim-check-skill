@@ -55,6 +55,18 @@ describe("claim extraction", () => {
     assert.equal(claims[0].id, "C1");
   });
 
+  it("excludes long ATX headings from claim candidates", () => {
+    const claims = extractClaims(`
+# Generated launch material review
+
+## Installation and configuration details ##
+
+### This structural heading is deliberately longer than the claim threshold
+`);
+
+    assert.deepEqual(claims, []);
+  });
+
   it("extracts consecutive unordered list items as separate claims", () => {
     const claims = extractClaims(`
 - The tool emits detailed JSON reports for automated review
@@ -104,6 +116,25 @@ Reviewers receive a compact report for editorial triage.
       "Reviewers receive a compact report for editorial triage."
     ]);
   });
+
+  it("extracts mixed prose and list claims without including headings", () => {
+    const claims = extractClaims(`
+# Generated launch material review
+
+The checker reviews generated drafts against supplied source bundles.
+
+## Installation and configuration details
+
+- The command emits detailed JSON reports for automated review
+1. Reviewers receive readable Markdown reports for editorial triage
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker reviews generated drafts against supplied source bundles.",
+      "The command emits detailed JSON reports for automated review",
+      "Reviewers receive readable Markdown reports for editorial triage"
+    ]);
+  });
 });
 
 describe("tokenize", () => {
@@ -117,6 +148,21 @@ describe("tokenize", () => {
 });
 
 describe("checkDraft", () => {
+  it("reports heading-only drafts as unverifiable", () => {
+    const report = checkDraft("# Generated launch material review", sources);
+
+    assert.equal(report.summary.unverifiable, 1);
+    assert.deepEqual(report.results, [{
+      id: "C0",
+      text: "No verifiable claims were extracted from the draft.",
+      status: "unverifiable",
+      evidence: [],
+      reason: "The draft did not contain any claim candidates.",
+      suggestion: "Add at least one concrete, source-backed prose or list claim."
+    }]);
+    assert.equal(shouldFail(report, "missing"), true);
+  });
+
   it("classifies supported and missing claims", () => {
     const report = checkDraft(
       "The project provides a local CLI and fixture-backed tests for reviewing generated launch material.\n\nIt publishes posts automatically to every network.",
@@ -365,5 +411,25 @@ describe("cli", () => {
 
     assert.equal(result.status, 2);
     assert.equal(result.stderr, "");
+  });
+
+  it("returns exit code 2 for a heading-only draft under fail-on automation", () => {
+    const directory = mkdtempSync(join(tmpdir(), "agent-claim-check-cli-"));
+    const draft = join(directory, "draft.md");
+    writeFileSync(draft, "# Generated launch material review\n\n## Installation and configuration details\n");
+    try {
+      const result = runCli([
+        "--draft", draft,
+        "--sources", "fixtures/sources.json",
+        "--format", "json",
+        "--fail-on", "missing"
+      ]);
+
+      assert.equal(result.status, 2);
+      assert.equal(result.stderr, "");
+      assert.equal(JSON.parse(result.stdout).results[0].status, "unverifiable");
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });
