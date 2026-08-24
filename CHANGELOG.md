@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Exclude Markdown structural headings from claim extraction and report
+  claimless drafts as unverifiable for reliable `--fail-on` automation.
 - Replace the unavailable npm-registry install command with the executable
   GitHub-source install and verify it in the package smoke test.
 - Extract ordered and unordered Markdown list items as separate claim candidates.
