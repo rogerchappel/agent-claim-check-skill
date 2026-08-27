@@ -72,9 +72,27 @@ export function readSources(path) {
 }
 
 export function extractClaims(markdown) {
-  return markdown
+  const structuralMarkdown = markdown
     .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]+`/g, " ")
+    .replace(/`[^`]+`/g, " ");
+  const lines = structuralMarkdown.split("\n");
+  const contentLines = [];
+
+  for (const line of lines) {
+    if (/^(?: {4,}|\t)/.test(line)) {
+      contentLines.push("");
+      continue;
+    }
+    if (/^[ \t]{0,3}(?:=+|-+)[ \t]*$/.test(line) && contentLines.at(-1)?.trim()) {
+      contentLines[contentLines.length - 1] = "";
+      contentLines.push("");
+      continue;
+    }
+    contentLines.push(line);
+  }
+
+  return contentLines
+    .join("\n")
     .replace(/^[ \t]{0,3}#{1,6}(?:[ \t]+.*|[ \t]*)$/gm, "\n\n")
     .replace(/^[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])[ \t]+/gm, "\n\n")
     .split(/(?<=[.!?])\s+|\n{2,}/)
