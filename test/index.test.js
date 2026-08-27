@@ -67,6 +67,37 @@ describe("claim extraction", () => {
     assert.deepEqual(claims, []);
   });
 
+  it("excludes both levels of Setext headings from claim candidates", () => {
+    const claims = extractClaims(`
+A sufficiently long release announcement heading
+================================================
+
+Another sufficiently long structural heading
+----------------------------------------------
+`);
+
+    assert.deepEqual(claims, []);
+  });
+
+  it("excludes indented code without suppressing adjacent prose or list claims", () => {
+    const claims = extractClaims(`
+The checker reviews adjacent prose before code examples.
+
+    const published = deployDraftWithoutApproval();
+    console.log(published);
+
+- The checker preserves a list claim after the code example
+
+The checker also preserves prose after indented code blocks.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker reviews adjacent prose before code examples.",
+      "The checker preserves a list claim after the code example",
+      "The checker also preserves prose after indented code blocks."
+    ]);
+  });
+
   it("extracts consecutive unordered list items as separate claims", () => {
     const claims = extractClaims(`
 - The tool emits detailed JSON reports for automated review
@@ -161,6 +192,19 @@ describe("checkDraft", () => {
       suggestion: "Add at least one concrete, source-backed prose or list claim."
     }]);
     assert.equal(shouldFail(report, "missing"), true);
+  });
+
+  it("reports Setext-heading and indented-code-only drafts as unverifiable", () => {
+    const report = checkDraft(`
+A sufficiently long structural heading
+========================================
+
+    const result = publishWithoutApproval();
+`, sources);
+
+    assert.equal(report.summary.unverifiable, 1);
+    assert.equal(report.results.length, 1);
+    assert.equal(report.results[0].id, "C0");
   });
 
   it("classifies supported and missing claims", () => {
@@ -428,6 +472,26 @@ describe("cli", () => {
       assert.equal(result.status, 2);
       assert.equal(result.stderr, "");
       assert.equal(JSON.parse(result.stdout).results[0].status, "unverifiable");
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("returns exit code 2 for a Setext-heading and indented-code-only draft", () => {
+    const directory = mkdtempSync(join(tmpdir(), "agent-claim-check-cli-"));
+    const draft = join(directory, "draft.md");
+    writeFileSync(draft, "A sufficiently long structural heading\n========================================\n\n    const result = publishWithoutApproval();\n");
+    try {
+      const result = runCli([
+        "--draft", draft,
+        "--sources", "fixtures/sources.json",
+        "--format", "json",
+        "--fail-on", "missing"
+      ]);
+
+      assert.equal(result.status, 2);
+      assert.equal(result.stderr, "");
+      assert.equal(JSON.parse(result.stdout).results[0].id, "C0");
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
