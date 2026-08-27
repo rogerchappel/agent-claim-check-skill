@@ -24,7 +24,9 @@ No approval is needed for local analysis. Explicit user approval is required bef
 1. Collect the exact draft and source bundle.
 2. Validate that source IDs are unique and that every source follows the strict
    string-field contract; the CLI rejects the whole bundle before classification.
-3. Run the CLI with markdown output for human review.
+3. Run the CLI with markdown output for human review. ATX and Setext headings,
+   fenced or indented code blocks, and inline code are excluded from claims;
+   adjacent prose and list items remain candidates.
 4. Treat `missing` claims as blockers for publication.
 5. Rewrite weak claims with narrower language or add source evidence.
 6. Re-run the checker before handing off the draft.
@@ -39,3 +41,5 @@ node bin/agent-claim-check.js --draft fixtures/draft.md --sources fixtures/sourc
 ## Validation
 
 Run `npm test`, `npm run check`, and `npm run smoke`. For release readiness, include the generated report in the PR body or handoff notes.
+Heading/code-only input produces a `C0` `unverifiable` result, so any configured
+`--fail-on` policy exits 2 instead of silently passing automation.
