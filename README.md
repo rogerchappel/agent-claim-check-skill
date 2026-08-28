@@ -40,12 +40,14 @@ These option values are validated before either input file is read, and invalid
 usage produces only an actionable error and usage text on stderr. A report
 matching a valid selected `--fail-on` threshold exits with status 2.
 
-Drafts may use ordinary Markdown prose, structural headings, and ordered or
-unordered lists. Both ATX (`# Heading`) and Setext (underlined) headings are
-excluded from claim candidates. Each list item is treated as a separate claim
+Drafts may use ordinary Markdown prose, blockquoted prose, structural headings,
+and ordered or unordered lists. Both ATX (`# Heading`) and Setext (underlined)
+headings are excluded from claim candidates, including headings inside a
+blockquote. Markdown tables, HTML comments, and link reference definitions are
+also structural and excluded. Each list item is treated as a separate claim
 candidate, including an item that continues across multiple lines, while prose
-remains sentence-based. Fenced, indented, and inline code are also excluded
-without suppressing adjacent prose or list claims. If nothing remains to check
+remains sentence-based. Fenced, indented, and inline code are excluded without
+suppressing adjacent prose or list claims. If nothing remains to check
 (for example, in a heading/code-only draft), the report contains an explicit
 `C0` `unverifiable` result. Any configured `--fail-on` threshold then exits
 with status 2 instead of silently passing automation.
