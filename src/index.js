@@ -74,11 +74,29 @@ export function readSources(path) {
 export function extractClaims(markdown) {
   const structuralMarkdown = markdown
     .replace(/```[\s\S]*?```/g, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/`[^`]+`/g, " ");
-  const lines = structuralMarkdown.split("\n");
+  const lines = structuralMarkdown
+    .split("\n")
+    .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, ""));
   const contentLines = [];
+  const tableLines = new Set();
 
-  for (const line of lines) {
+  for (let index = 1; index < lines.length; index += 1) {
+    if (/^[ \t]*\|?[ \t]*:?-{3,}:?[ \t]*(?:\|[ \t]*:?-{3,}:?[ \t]*)+\|?[ \t]*$/.test(lines[index])) {
+      tableLines.add(index - 1);
+      tableLines.add(index);
+      for (let row = index + 1; row < lines.length && lines[row].includes("|"); row += 1) {
+        tableLines.add(row);
+      }
+    }
+  }
+
+  for (const [index, line] of lines.entries()) {
+    if (tableLines.has(index) || /^[ \t]{0,3}\[[^\]]+\]:[ \t]*\S+/.test(line)) {
+      contentLines.push("");
+      continue;
+    }
     if (/^(?: {4,}|\t)/.test(line)) {
       contentLines.push("");
       continue;

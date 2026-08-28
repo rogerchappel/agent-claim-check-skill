@@ -79,6 +79,64 @@ Another sufficiently long structural heading
     assert.deepEqual(claims, []);
   });
 
+  it("excludes blockquote headings while preserving ordinary blockquoted prose", () => {
+    const claims = extractClaims(`
+> ## This quoted section heading is structural, not a factual claim
+>
+> The checker preserves intentionally quoted factual prose for review.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves intentionally quoted factual prose for review."
+    ]);
+  });
+
+  it("excludes Markdown table structure without suppressing adjacent prose", () => {
+    const claims = extractClaims(`
+The checker preserves factual prose before a table.
+
+| Capability description | Current support status |
+| --- | --- |
+| Local claim review | Supported |
+
+The checker preserves factual prose after a table.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves factual prose before a table.",
+      "The checker preserves factual prose after a table."
+    ]);
+  });
+
+  it("excludes HTML comments and link reference definitions", () => {
+    const claims = extractClaims(`
+The checker preserves factual prose before structural metadata.
+
+<!-- This editorial instruction is structural metadata,
+not a factual claim candidate. -->
+
+[product-docs]: https://example.com/documentation "Product documentation reference"
+
+The checker preserves factual prose after structural metadata.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves factual prose before structural metadata.",
+      "The checker preserves factual prose after structural metadata."
+    ]);
+  });
+
+  it("returns no claims for structural-only Markdown constructs", () => {
+    for (const markdown of [
+      "> ## This quoted section heading is structural, not a factual claim",
+      "| Capability description | Current support status |\n| --- | --- |",
+      "<!-- This editorial instruction is structural metadata, not a factual claim. -->",
+      '[product-docs]: https://example.com/documentation "Product documentation reference"'
+    ]) {
+      assert.deepEqual(extractClaims(markdown), []);
+    }
+  });
+
   it("excludes indented code without suppressing adjacent prose or list claims", () => {
     const claims = extractClaims(`
 The checker reviews adjacent prose before code examples.
