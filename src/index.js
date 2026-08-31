@@ -71,14 +71,45 @@ export function readSources(path) {
   });
 }
 
+function stripFencedCode(lines) {
+  const content = [];
+  let fence = null;
+
+  for (const line of lines) {
+    if (fence) {
+      const closing = line.match(/^[ \t]{0,3}([`~]{3,})[ \t]*$/);
+      if (closing && closing[1][0] === fence.marker && closing[1].length >= fence.length) {
+        fence = null;
+      }
+      content.push("");
+      continue;
+    }
+
+    const opening = line.match(/^[ \t]{0,3}([`~]{3,})(.*)$/);
+    if (opening && !opening[1].includes(opening[1][0] === "`" ? "~" : "`")) {
+      const marker = opening[1][0];
+      const isSingleMarkerRun = [...opening[1]].every((character) => character === marker);
+      const validInfoString = marker === "~" || !opening[2].includes("`");
+      if (isSingleMarkerRun && validInfoString) {
+        fence = { marker, length: opening[1].length };
+        content.push("");
+        continue;
+      }
+    }
+
+    content.push(line);
+  }
+
+  return content;
+}
+
 export function extractClaims(markdown) {
   const structuralMarkdown = markdown
-    .replace(/```[\s\S]*?```/g, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/`[^`]+`/g, " ");
-  const lines = structuralMarkdown
+  const lines = stripFencedCode(structuralMarkdown
     .split("\n")
-    .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, ""));
+    .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, "")));
   const contentLines = [];
   const tableLines = new Set();
 
