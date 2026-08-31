@@ -206,6 +206,38 @@ Reviewers receive a compact report for editorial triage.
     ]);
   });
 
+  it("excludes complete backtick and tilde fences without suppressing adjacent claims", () => {
+    const claims = extractClaims(`
+The checker preserves factual prose before fenced examples.
+
+~~~~ javascript
+The service automatically publishes every approved draft to production.
+~~~
+~~~~
+
+- The checker preserves a list claim between fenced examples
+
+\`\`\`\`markdown
+The service automatically deletes every rejected draft from production.
+\`\`\`
+\`\`\`\`
+
+The checker preserves factual prose after fenced examples.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves factual prose before fenced examples.",
+      "The checker preserves a list claim between fenced examples",
+      "The checker preserves factual prose after fenced examples."
+    ]);
+  });
+
+  it("treats an unclosed CommonMark fence as code through the end of the draft", () => {
+    assert.deepEqual(extractClaims(`~~~ js
+The service automatically publishes every approved draft to production.
+`), []);
+  });
+
   it("extracts mixed prose and list claims without including headings", () => {
     const claims = extractClaims(`
 # Generated launch material review
@@ -550,6 +582,28 @@ describe("cli", () => {
       assert.equal(result.status, 2);
       assert.equal(result.stderr, "");
       assert.equal(JSON.parse(result.stdout).results[0].id, "C0");
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("returns C0 and exit code 2 for a tilde-fenced-only draft", () => {
+    const directory = mkdtempSync(join(tmpdir(), "agent-claim-check-cli-"));
+    const draft = join(directory, "draft.md");
+    writeFileSync(draft, "~~~js\nThe service automatically publishes every approved draft to production.\n~~~\n");
+    try {
+      const result = runCli([
+        "--draft", draft,
+        "--sources", "fixtures/sources.json",
+        "--format", "json",
+        "--fail-on", "missing"
+      ]);
+
+      assert.equal(result.status, 2);
+      assert.equal(result.stderr, "");
+      const report = JSON.parse(result.stdout);
+      assert.equal(report.results[0].id, "C0");
+      assert.equal(report.results[0].status, "unverifiable");
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
