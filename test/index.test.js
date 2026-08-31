@@ -238,6 +238,15 @@ The service automatically publishes every approved draft to production.
 `), []);
   });
 
+  it("does not treat a backtick fence with a backtick in its info string as code", () => {
+    const claims = extractClaims(`\`\`\` language=\`javascript\`
+The checker preserves this factual prose because the opening fence is invalid.
+\`\`\``);
+
+    assert.equal(claims.length, 1);
+    assert.match(claims[0].text, /The checker preserves this factual prose because the opening fence is invalid\./);
+  });
+
   it("extracts mixed prose and list claims without including headings", () => {
     const claims = extractClaims(`
 # Generated launch material review

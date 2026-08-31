@@ -104,12 +104,11 @@ function stripFencedCode(lines) {
 }
 
 export function extractClaims(markdown) {
-  const structuralMarkdown = markdown
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/`[^`]+`/g, " ");
+  const structuralMarkdown = markdown.replace(/<!--[\s\S]*?-->/g, " ");
   const lines = stripFencedCode(structuralMarkdown
     .split("\n")
-    .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, "")));
+    .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, "")))
+    .map((line) => line.replace(/`[^`]+`/g, " "));
   const contentLines = [];
   const tableLines = new Set();
 
