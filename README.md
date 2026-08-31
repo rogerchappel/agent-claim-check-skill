@@ -46,7 +46,10 @@ headings are excluded from claim candidates, including headings inside a
 blockquote. Markdown tables, HTML comments, and link reference definitions are
 also structural and excluded. Each list item is treated as a separate claim
 candidate, including an item that continues across multiple lines, while prose
-remains sentence-based. Fenced, indented, and inline code are excluded without
+remains sentence-based. Complete CommonMark backtick and tilde fences are
+excluded, including fences with info strings and delimiters of three or more
+characters. The closing delimiter must use the same character and be at least
+as long as the opener. Fenced, indented, and inline code are excluded without
 suppressing adjacent prose or list claims. If nothing remains to check
 (for example, in a heading/code-only draft), the report contains an explicit
 `C0` `unverifiable` result. Any configured `--fail-on` threshold then exits
