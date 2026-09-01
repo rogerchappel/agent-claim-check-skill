@@ -166,6 +166,34 @@ function hasNegation(text) {
   return NEGATION_PATTERN.test(text);
 }
 
+function polarityTokens(text) {
+  return String(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length > 1)
+    .filter((token) => !STOP_WORDS.has(token) && !hasNegation(token))
+    .map((token) => token.length > 4 && token.endsWith("s") ? token.slice(0, -1) : token);
+}
+
+function hasMatchedNegation(text, referenceText) {
+  const clauses = String(text)
+    .split(/[,;:]\s*(?:but|yet|while|although|however)?\s*|\s+\b(?:but|yet|while|although|however)\b\s+/i)
+    .map((clause) => clause.trim())
+    .filter(Boolean);
+  const terms = new Set(polarityTokens(referenceText));
+  const ranked = clauses
+    .map((clause, index) => {
+      const tokens = polarityTokens(clause);
+      const overlap = tokens.filter((token) => terms.has(token)).length;
+      return { clause, index, relevance: tokens.length ? overlap / tokens.length : 0, overlap };
+    })
+    .sort((left, right) =>
+      right.relevance - left.relevance || right.overlap - left.overlap || left.index - right.index
+    );
+  return hasNegation(ranked[0]?.clause ?? text);
+}
+
 function splitPassages(source) {
   const passages = String(source.text)
     .split(/(?<=[.!?])\s+|\n+/)
@@ -192,7 +220,6 @@ function compareMatches(left, right) {
 
 export function classifyClaim(claim, sources) {
   const claimTokens = new Set(tokenize(claim.text));
-  const claimHasNegation = hasNegation(claim.text);
   if (claimTokens.size === 0) {
     return {
       ...claim,
@@ -213,7 +240,8 @@ export function classifyClaim(claim, sources) {
           passage,
           overlap,
           score: overlap.length / claimTokens.size,
-          negationMismatch: claimHasNegation !== hasNegation(passage)
+          negationMismatch:
+            hasMatchedNegation(claim.text, passage) !== hasMatchedNegation(passage, claim.text)
         };
       })
     )
