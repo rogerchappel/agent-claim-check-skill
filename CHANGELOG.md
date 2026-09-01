@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Associate negation polarity with the locally matched clause so unrelated
+  negation elsewhere in the same sentence cannot reverse a claim result.
 - Exclude Markdown structural headings from claim extraction and report
   claimless drafts as unverifiable for reliable `--fail-on` automation.
 - Replace the unavailable npm-registry install command with the executable
