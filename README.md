@@ -122,8 +122,13 @@ when no equally strong matching-polarity evidence exists. JSON evidence begins
 with the selected passage in the `passage` field so callers can show what was
 actually matched.
 
+Within a sentence, polarity is taken from the clause that most closely matches
+the claim terms. For example, `supports CSV, but does not support XML` supports
+a positive CSV claim and contradicts a negative CSV claim; reversing those
+clauses does not change the result.
+
 This polarity check recognizes common English negators such as `not`, `never`,
-`without`, and contractions ending in `n't`. It does not parse grammar, resolve
+`without`, and contractions ending in `n't`. It does not fully parse grammar, resolve
 pronouns, understand double negatives, or determine whether similarly worded
 statements have the same meaning. Sentence splitting is punctuation-based, so
 abbreviations and unusual formatting can produce imperfect passages. Treat the
