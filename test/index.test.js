@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { checkDraft, extractClaims, readSources, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
+import { checkDraft, classifyClaim, extractClaims, readSources, renderMarkdown, shouldFail, tokenize } from "../src/index.js";
 
 const sources = [
   {
@@ -368,6 +368,31 @@ A sufficiently long structural heading
     assert.match(report.results[0].reason, /matched passage.*opposite negation polarity/);
     assert.equal(report.results[0].evidence[0].passage, "The feature supports exports.");
   });
+
+  for (const evidence of [
+    "The product supports CSV exports, but does not support XML exports.",
+    "The product does not support XML exports, but supports CSV exports."
+  ]) {
+    it(`associates positive polarity with the matched CSV clause: ${evidence}`, () => {
+      const result = classifyClaim(
+        { id: "C1", text: "The product supports CSV exports." },
+        [{ id: "docs", title: "Docs", url: "", text: evidence }]
+      );
+
+      assert.equal(result.status, "supported");
+      assert.doesNotMatch(result.reason, /opposite negation polarity/);
+    });
+
+    it(`does not borrow XML negation for a negative CSV claim: ${evidence}`, () => {
+      const result = classifyClaim(
+        { id: "C1", text: "The product does not support CSV exports." },
+        [{ id: "docs", title: "Docs", url: "", text: evidence }]
+      );
+
+      assert.equal(result.status, "weak");
+      assert.match(result.reason, /opposite negation polarity/);
+    });
+  }
 
   it("selects the strongest local passage across sources", () => {
     const report = checkDraft(
