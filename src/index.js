@@ -195,12 +195,10 @@ function hasMatchedNegation(text, referenceText) {
 }
 
 function splitPassages(source) {
-  const passages = String(source.text)
+  return String(source.text)
     .split(/(?<=[.!?])\s+|\n+/)
     .map((passage) => passage.replace(/\s+/g, " ").trim())
     .filter(Boolean);
-  const title = String(source.title ?? "").trim();
-  return title && title !== source.id ? [title, ...passages] : passages;
 }
 
 function compareText(left, right) {
