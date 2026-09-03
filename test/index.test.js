@@ -323,6 +323,29 @@ A sufficiently long structural heading
     assert.equal(report.summary.supported, 1);
   });
 
+  it("uses source text rather than display titles as claim evidence", () => {
+    const title = "The service guarantees instant refunds";
+    const report = checkDraft(
+      "The service guarantees instant refunds.",
+      [{
+        id: "refund-policy",
+        title,
+        url: "https://example.test/refunds",
+        text: "The service does not guarantee instant refunds."
+      }]
+    );
+
+    assert.equal(report.results[0].status, "weak");
+    assert.equal(report.results[0].evidence.every(({ passage }) => passage !== title), true);
+    assert.deepEqual(report.results[0].evidence[0], {
+      id: "refund-policy",
+      title,
+      url: "https://example.test/refunds",
+      passage: "The service does not guarantee instant refunds.",
+      overlap: ["service", "instant", "refunds"]
+    });
+  });
+
   it("does not support a claim that directly negates its evidence", () => {
     const report = checkDraft(
       "The project does not provide a local CLI or fixture-backed tests.",
