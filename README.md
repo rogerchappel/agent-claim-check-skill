@@ -71,7 +71,9 @@ Source bundles are JSON arrays:
 Each array entry must be an object with a unique, non-blank string `id` and a
 non-blank string `text`. Optional `title` and `url` fields must be strings when
 present; an omitted or blank title defaults to the source ID, and an omitted or
-blank URL defaults to an empty string. Invalid entries are rejected before any
+blank URL defaults to an empty string. Titles and URLs are display metadata in
+reported evidence; only passages from the required `text` field are scored as
+claim evidence. Invalid entries are rejected before any
 claims are classified, with the zero-based source index and field in the error.
 
 ## Verify
@@ -113,7 +115,7 @@ npm run smoke
 ## Limitations
 
 The checker uses deterministic local heuristics rather than a live research
-model. It splits each source into sentence-like passages, ranks those passages
+model. It splits each source's `text` into sentence-like passages, ranks those passages
 by lexical overlap, and uses matching negation polarity to break equal-score
 ties. Remaining ties use source and passage text for deterministic evidence
 ordering, independent of source bundle order. A higher-scoring passage still
