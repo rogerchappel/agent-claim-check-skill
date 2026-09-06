@@ -103,12 +103,54 @@ function stripFencedCode(lines) {
   return content;
 }
 
+function stripInlineCodeSpans(markdown) {
+  let output = "";
+  let index = 0;
+
+  while (index < markdown.length) {
+    if (markdown[index] !== "`") {
+      output += markdown[index];
+      index += 1;
+      continue;
+    }
+
+    let openerEnd = index;
+    while (markdown[openerEnd] === "`") openerEnd += 1;
+    const delimiterLength = openerEnd - index;
+    let cursor = openerEnd;
+    let closingEnd = -1;
+
+    while (cursor < markdown.length) {
+      const next = markdown.indexOf("`", cursor);
+      if (next === -1) break;
+      let runEnd = next;
+      while (markdown[runEnd] === "`") runEnd += 1;
+      if (runEnd - next === delimiterLength) {
+        closingEnd = runEnd;
+        break;
+      }
+      cursor = runEnd;
+    }
+
+    if (closingEnd === -1) {
+      output += markdown.slice(index, openerEnd);
+      index = openerEnd;
+      continue;
+    }
+
+    output += " ";
+    index = closingEnd;
+  }
+
+  return output;
+}
+
 export function extractClaims(markdown) {
   const structuralMarkdown = markdown.replace(/<!--[\s\S]*?-->/g, " ");
-  const lines = stripFencedCode(structuralMarkdown
+  const lines = stripInlineCodeSpans(stripFencedCode(structuralMarkdown
     .split("\n")
     .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, "")))
-    .map((line) => line.replace(/`[^`]+`/g, " "));
+    .join("\n")).split("\n");
   const contentLines = [];
   const tableLines = new Set();
 
