@@ -206,6 +206,29 @@ Reviewers receive a compact report for editorial triage.
     ]);
   });
 
+  it("excludes variable-length inline code spans and preserves adjacent prose", () => {
+    const claims = extractClaims(`
+The checker keeps prose before \`\`code with \` a shorter run\`\` and prose after it.
+
+The checker removes \`\`\`first \`\` nested run\`\`\` plus \`\`second \` run\`\` from one claim.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker keeps prose before and prose after it.",
+      "The checker removes plus from one claim."
+    ]);
+  });
+
+  it("preserves unmatched backtick delimiters as ordinary prose", () => {
+    const claims = extractClaims(
+      "The checker preserves an unmatched ``delimiter and all surrounding factual prose."
+    );
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves an unmatched ``delimiter and all surrounding factual prose."
+    ]);
+  });
+
   it("excludes complete backtick and tilde fences without suppressing adjacent claims", () => {
     const claims = extractClaims(`
 The checker preserves factual prose before fenced examples.
