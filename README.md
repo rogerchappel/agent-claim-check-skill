@@ -96,11 +96,10 @@ on Node.js 20 and 22.
 
 ## Package contents
 
-`npm run package:smoke` performs a dry-run pack, asserts that the tarball
-contains the CLI entrypoint, library source, `SKILL.md`, README, license, and
-security policy, and then runs the documented GitHub install from a clean
-temporary directory and invokes the installed CLI with `--help` and
-`--version`.
+`npm run package:smoke` creates a tarball in a disposable directory, asserts
+that it contains the CLI entrypoint, library source, `SKILL.md`, README,
+license, and security policy, then installs that exact tarball into a clean
+disposable prefix and invokes the installed CLI with `--help` and `--version`.
 
 
 ## Verification
