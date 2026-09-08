@@ -43,7 +43,8 @@ matching a valid selected `--fail-on` threshold exits with status 2.
 Drafts may use ordinary Markdown prose, blockquoted prose, structural headings,
 and ordered or unordered lists. Both ATX (`# Heading`) and Setext (underlined)
 headings are excluded from claim candidates, including headings inside a
-blockquote. Markdown tables, HTML comments, and link reference definitions are
+blockquote. LF, CRLF, and CR line endings have the same structural behavior.
+Markdown tables, HTML comments, and link reference definitions are
 also structural and excluded. Each list item is treated as a separate claim
 candidate, including an item that continues across multiple lines, while prose
 remains sentence-based. Complete CommonMark backtick and tilde fences are
