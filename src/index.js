@@ -146,7 +146,9 @@ function stripInlineCodeSpans(markdown) {
 }
 
 export function extractClaims(markdown) {
-  const structuralMarkdown = markdown.replace(/<!--[\s\S]*?-->/g, " ");
+  const structuralMarkdown = markdown
+    .replace(/\r\n?/g, "\n")
+    .replace(/<!--[\s\S]*?-->/g, " ");
   const lines = stripInlineCodeSpans(stripFencedCode(structuralMarkdown
     .split("\n")
     .map((line) => line.replace(/^[ \t]{0,3}>[ \t]?/, "")))
