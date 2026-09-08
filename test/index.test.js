@@ -79,6 +79,25 @@ Another sufficiently long structural heading
     assert.deepEqual(claims, []);
   });
 
+  it("excludes CRLF Setext headings while preserving adjacent prose", () => {
+    const claims = extractClaims([
+      "A sufficiently long release announcement heading",
+      "================================================",
+      "",
+      "The checker preserves this ordinary factual prose for review.",
+      "",
+      "Another sufficiently long structural heading",
+      "----------------------------------------------",
+      "",
+      "The report retains this second verifiable statement as well."
+    ].join("\r\n"));
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves this ordinary factual prose for review.",
+      "The report retains this second verifiable statement as well."
+    ]);
+  });
+
   it("excludes blockquote headings while preserving ordinary blockquoted prose", () => {
     const claims = extractClaims(`
 > ## This quoted section heading is structural, not a factual claim
