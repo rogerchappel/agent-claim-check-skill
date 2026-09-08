@@ -98,6 +98,19 @@ Another sufficiently long structural heading
     ]);
   });
 
+  it("excludes Setext headings with legacy CR line endings", () => {
+    const claims = extractClaims([
+      "A sufficiently long structural heading",
+      "----------------------------------------",
+      "",
+      "The checker still extracts ordinary prose after normalization."
+    ].join("\r"));
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker still extracts ordinary prose after normalization."
+    ]);
+  });
+
   it("excludes blockquote headings while preserving ordinary blockquoted prose", () => {
     const claims = extractClaims(`
 > ## This quoted section heading is structural, not a factual claim
