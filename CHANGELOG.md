@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- Recognise GFM table delimiter cells of one or more hyphens, so short
+  delimiter rows no longer leak raw table text into scored claims.
+- Keep four-space and tab indented continuation lines with the list item or
+  paragraph they continue, while blank-line-preceded indented code blocks stay
+  excluded and a further indented list marker still starts its own claim.
 - Associate negation polarity with the locally matched clause so unrelated
   negation elsewhere in the same sentence cannot reverse a claim result.
 - Exclude Markdown structural headings from claim extraction and report
