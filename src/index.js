@@ -145,6 +145,9 @@ function stripInlineCodeSpans(markdown) {
   return output;
 }
 
+// GFM delimiter cells accept one or more hyphens with optional leading/trailing colons.
+const TABLE_DELIMITER_ROW = /^[ \t]*\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$/;
+
 export function extractClaims(markdown) {
   const structuralMarkdown = markdown
     .replace(/\r\n?/g, "\n")
@@ -157,7 +160,7 @@ export function extractClaims(markdown) {
   const tableLines = new Set();
 
   for (let index = 1; index < lines.length; index += 1) {
-    if (/^[ \t]*\|?[ \t]*:?-{3,}:?[ \t]*(?:\|[ \t]*:?-{3,}:?[ \t]*)+\|?[ \t]*$/.test(lines[index])) {
+    if (TABLE_DELIMITER_ROW.test(lines[index])) {
       tableLines.add(index - 1);
       tableLines.add(index);
       for (let row = index + 1; row < lines.length && lines[row].includes("|"); row += 1) {
