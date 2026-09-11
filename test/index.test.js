@@ -238,6 +238,85 @@ The checker also preserves prose after indented code blocks.
     ]);
   });
 
+  it("keeps tab-indented and ordered list item continuations in one claim", () => {
+    const tabbed = extractClaims(`
+- The checker evaluates every claim
+	against the supplied source bundle deterministically.
+`);
+    const ordered = extractClaims(`
+1. The checker evaluates every claim
+    against the supplied source bundle deterministically.
+`);
+    const expected = [
+      "The checker evaluates every claim against the supplied source bundle deterministically."
+    ];
+
+    assert.deepEqual(tabbed.map(({ text }) => text), expected);
+    assert.deepEqual(ordered.map(({ text }) => text), expected);
+  });
+
+  it("keeps nested list items as separate claims when they are indented four spaces", () => {
+    const claims = extractClaims(`
+- The parent item states a claim about the local review behaviour
+    - The nested item states its own separate claim about reporting
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The parent item states a claim about the local review behaviour",
+      "The nested item states its own separate claim about reporting"
+    ]);
+  });
+
+  it("separates four-space indented code from indented continuation lines", () => {
+    const claims = extractClaims(`
+- The checker keeps a four-space continuation with its own item claim
+
+    const published = deployDraftWithoutApproval();
+    console.log(published);
+
+The prose before an indented block stays a claim on its own.
+
+    while (retry) {
+      publishWithoutApproval();
+    }
+
+The prose after an indented block stays a claim on its own.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker keeps a four-space continuation with its own item claim",
+      "The prose before an indented block stays a claim on its own.",
+      "The prose after an indented block stays a claim on its own."
+    ]);
+  });
+
+  it("extracts claims from a mixed table, list, and code document", () => {
+    const claims = extractClaims(`
+The checker preserves factual prose before every structural block.
+
+| Capability description | Current support status |
+| :- | -: |
+| Local claim review | Supported |
+
+- The checker evaluates every claim
+    against the supplied source bundle deterministically.
+
+1. The checker reports evidence identifiers
+   for each supported claim
+
+    const published = deployDraftWithoutApproval();
+
+The checker preserves factual prose after every structural block.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker preserves factual prose before every structural block.",
+      "The checker evaluates every claim against the supplied source bundle deterministically.",
+      "The checker reports evidence identifiers for each supported claim",
+      "The checker preserves factual prose after every structural block."
+    ]);
+  });
+
   it("extracts consecutive unordered list items as separate claims", () => {
     const claims = extractClaims(`
 - The tool emits detailed JSON reports for automated review
