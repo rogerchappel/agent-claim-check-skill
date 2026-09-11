@@ -45,16 +45,22 @@ and ordered or unordered lists. Both ATX (`# Heading`) and Setext (underlined)
 headings are excluded from claim candidates, including headings inside a
 blockquote. LF, CRLF, and CR line endings have the same structural behavior.
 Markdown tables, HTML comments, and link reference definitions are
-also structural and excluded. Each list item is treated as a separate claim
+also structural and excluded. A table is recognised with its GFM delimiter
+grammar, so each delimiter cell may use one or more hyphens with optional
+`:` alignment markers. Each list item is treated as a separate claim
 candidate, including an item that continues across multiple lines, while prose
-remains sentence-based. Complete CommonMark backtick and tilde fences are
+remains sentence-based. A continuation line may be indented by four or more
+spaces or a tab; a further indented list marker starts its own item. Complete
+CommonMark backtick and tilde fences are
 excluded, including fences with info strings and delimiters of three or more
 characters. The closing delimiter must use the same character and be at least
 as long as the opener. Inline code spans may use any length of backtick
 delimiter and can contain shorter backtick runs; only an equal-length run
 closes the span. Unmatched backtick runs remain ordinary prose. Fenced,
 indented, and inline code are excluded without suppressing adjacent prose or
-list claims. If nothing remains to check
+list claims. An indented line only opens a code block when nothing above it is
+still open for continuation, because CommonMark indented code cannot interrupt
+a paragraph. If nothing remains to check
 (for example, in a heading/code-only draft), the report contains an explicit
 `C0` `unverifiable` result. Any configured `--fail-on` threshold then exits
 with status 2 instead of silently passing automation.

@@ -25,10 +25,11 @@ No approval is needed for local analysis. Explicit user approval is required bef
 2. Validate that source IDs are unique and that every source follows the strict
    string-field contract; the CLI rejects the whole bundle before classification.
 3. Run the CLI with markdown output for human review. ATX and Setext headings
-   (including blockquoted headings), Markdown tables, HTML comments, link
-   reference definitions, fenced or indented code blocks, and inline code are
-   excluded from claims; adjacent ordinary or blockquoted prose and list items
-   remain candidates.
+   (including blockquoted headings), Markdown tables (any GFM delimiter cell
+   width), HTML comments, link reference definitions, fenced or indented code
+   blocks, and inline code are excluded from claims; adjacent ordinary or
+   blockquoted prose, list items, and four-space item continuations remain
+   candidates.
 4. Treat `missing` claims as blockers for publication.
 5. Rewrite weak claims with narrower language or add source evidence.
 6. Re-run the checker before handing off the draft.
