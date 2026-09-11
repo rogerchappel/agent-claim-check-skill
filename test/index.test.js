@@ -140,6 +140,31 @@ The checker preserves factual prose after a table.
     ]);
   });
 
+  // GFM allows one or more hyphens per delimiter cell, with optional alignment colons.
+  for (const delimiter of ["| - | - |", "| -- | -- |", "| --- | --- |", "| :--- | ---: |", "|-|-|"]) {
+    it(`excludes Markdown tables using the "${delimiter}" delimiter row`, () => {
+      const claims = extractClaims(`
+The checker preserves factual prose before a table.
+
+| Capability description | Current support status |
+${delimiter}
+| Local claim review | Supported |
+
+The checker preserves factual prose after a table.
+`);
+
+      assert.deepEqual(claims.map(({ text }) => text), [
+        "The checker preserves factual prose before a table.",
+        "The checker preserves factual prose after a table."
+      ]);
+    });
+  }
+
+  it("returns no claims for tables whose only content is a short delimiter row", () => {
+    assert.deepEqual(extractClaims("| Capability description | Current support status |\n| - | - |"), []);
+    assert.deepEqual(extractClaims("| Capability description | Current support status |\n| -- | -- |"), []);
+  });
+
   it("excludes HTML comments and link reference definitions", () => {
     const claims = extractClaims(`
 The checker preserves factual prose before structural metadata.
