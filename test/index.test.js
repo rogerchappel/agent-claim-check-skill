@@ -194,6 +194,31 @@ The checker preserves factual prose after structural metadata.
     }
   });
 
+  it("keeps a four-space indented list item continuation in one claim", () => {
+    const claims = extractClaims(`
+- The checker evaluates every claim
+    against the supplied source bundle deterministically.
+`);
+
+    assert.deepEqual(claims.map(({ text }) => text), [
+      "The checker evaluates every claim against the supplied source bundle deterministically."
+    ]);
+  });
+
+  it("keeps a four-space indented paragraph continuation in one claim", () => {
+    const lazy = extractClaims(`
+The checker evaluates every claim against the supplied source
+    bundle deterministically and reports the evidence it used.
+`);
+    const unindented = extractClaims(`
+The checker evaluates every claim against the supplied source
+bundle deterministically and reports the evidence it used.
+`);
+
+    assert.deepEqual(lazy, unindented);
+    assert.equal(lazy.length, 1);
+  });
+
   it("excludes indented code without suppressing adjacent prose or list claims", () => {
     const claims = extractClaims(`
 The checker reviews adjacent prose before code examples.
