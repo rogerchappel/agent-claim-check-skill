@@ -148,6 +148,11 @@ function stripInlineCodeSpans(markdown) {
 // GFM delimiter cells accept one or more hyphens with optional leading/trailing colons.
 const TABLE_DELIMITER_ROW = /^[ \t]*\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$/;
 
+const BLANK_LINE = /^[ \t]*$/;
+const INDENTED_LINE = /^(?: {4,}|\t)/;
+const ATX_HEADING = /^[ \t]{0,3}#{1,6}(?:[ \t]+.*|[ \t]*)$/;
+const THEMATIC_BREAK = /^[ \t]{0,3}(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})$/;
+
 export function extractClaims(markdown) {
   const structuralMarkdown = markdown
     .replace(/\r\n?/g, "\n")
@@ -169,21 +174,29 @@ export function extractClaims(markdown) {
     }
   }
 
+  let continuationOpen = false;
+
   for (const [index, line] of lines.entries()) {
     if (tableLines.has(index) || /^[ \t]{0,3}\[[^\]]+\]:[ \t]*\S+/.test(line)) {
       contentLines.push("");
+      continuationOpen = false;
       continue;
     }
-    if (/^(?: {4,}|\t)/.test(line)) {
-      contentLines.push("");
+    if (INDENTED_LINE.test(line)) {
+      // An indented line can only start an indented code block when nothing
+      // above it is still open for continuation, so a >=4-space line written
+      // directly under a list item or paragraph line belongs to that content.
+      contentLines.push(continuationOpen ? line.replace(/^[ \t]+/, " ") : "");
       continue;
     }
     if (/^[ \t]{0,3}(?:=+|-+)[ \t]*$/.test(line) && contentLines.at(-1)?.trim()) {
       contentLines[contentLines.length - 1] = "";
       contentLines.push("");
+      continuationOpen = false;
       continue;
     }
     contentLines.push(line);
+    continuationOpen = !BLANK_LINE.test(line) && !ATX_HEADING.test(line) && !THEMATIC_BREAK.test(line);
   }
 
   return contentLines
