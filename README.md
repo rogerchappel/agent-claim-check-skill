@@ -20,6 +20,16 @@ npm install --global github:rogerchappel/agent-claim-check-skill
 The project is currently distributed from this GitHub repository and has not
 yet been published to the npm registry.
 
+To test installation from a clean directory, create a new directory and run:
+
+```bash
+mkdir -p test-install && cd test-install
+npm install --global github:rogerchappel/agent-claim-check-skill
+```
+
+This ensures that the package can be correctly installed and used from a clean
+working directory.
+
 ## Example
 
 ```bash
