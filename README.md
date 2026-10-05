@@ -99,7 +99,7 @@ npm run release:check
 ```
 
 Pull requests and pushes to `main` run the same release gate in GitHub Actions
-on Node.js 20 and 22.
+on Node.js 20, 22, and 24.
 
 ## Package contents
 
