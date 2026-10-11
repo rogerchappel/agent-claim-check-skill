@@ -29,6 +29,7 @@
     "src",
     "fixtures",
     "docs",
+    "scripts/package-smoke.js",
     "SKILL.md",
     "README.md",
     "LICENSE",

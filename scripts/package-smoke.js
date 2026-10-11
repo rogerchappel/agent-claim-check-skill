@@ -27,6 +27,7 @@ try {
     "src/index.js",
     "fixtures/draft.md",
     "fixtures/sources.json",
+    "scripts/package-smoke.js",
     "SKILL.md",
     "README.md",
     "LICENSE",
