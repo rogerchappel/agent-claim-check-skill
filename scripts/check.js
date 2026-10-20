@@ -29,7 +29,10 @@ if (!pkg.bin || !pkg.scripts?.smoke || !pkg.scripts?.test) {
 }
 
 const files = new Set(pkg.files ?? []);
-for (const requiredFile of ["bin", "src", "fixtures", "SKILL.md", "README.md", "LICENSE"]) {
+for (const requiredFile of [
+  "bin", "src", "fixtures", "docs", "SKILL.md", "README.md", "LICENSE",
+  "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md"
+]) {
   if (!files.has(requiredFile)) {
     console.error(`package.json files must include ${requiredFile}.`);
     process.exit(1);
