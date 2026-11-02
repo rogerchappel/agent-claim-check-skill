@@ -850,3 +850,17 @@ describe("cli", () => {
     }
   });
 });
+
+describe("launch-draft feedback fixture", () => {
+  it("keeps review evidence bounded to one reproducible draft and documented limitations", () => {
+    const feedback = readFileSync("fixtures/launch-draft-feedback.md", "utf8");
+    const draft = feedback.match(/## Draft under review\n([\s\S]*?)\n## Feedback/);
+
+    assert.ok(draft, "fixture includes the exact reviewed draft");
+    assert.match(draft[1], /automatically publishes approved posts/);
+    assert.match(feedback, /Remove the automatic publishing and legal-safety guarantees/);
+    assert.match(feedback, /does not establish representative user research/);
+    assert.match(feedback, /does not publish content or provide legal review/);
+    assert.doesNotMatch(feedback, /customer survey|statistically significant|published launch/i);
+  });
+});

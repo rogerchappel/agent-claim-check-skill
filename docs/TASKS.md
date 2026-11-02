@@ -15,5 +15,5 @@
 
 - [x] Document limitations and safety notes.
 - [x] Add release-candidate notes.
-- [ ] Gather feedback from a real repo launch draft.
+- [x] Record bounded, reproducible editorial feedback from a real repository launch draft (`fixtures/launch-draft-feedback.md`); this is a fixture, not representative user research.
 - [ ] Add optional SARIF or reviewdog output.
