@@ -23,6 +23,14 @@ if (missing.length) {
 }
 
 const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
+const matrix = workflow.match(/node-version:\s*\n((?:\s+-\s+[^\n]+\n?)+)/);
+const versions = matrix?.[1].match(/^\s+-\s+(\d+)\.x\s*$/gm)?.map((line) => Number(line.match(/(\d+)\.x/)[1]));
+const engineFloor = pkg.engines?.node?.match(/^>=\s*(\d+)$/)?.[1];
+if (!versions?.length || !engineFloor || Number(engineFloor) !== Math.min(...versions)) {
+  console.error("package.json engines.node floor must match the lowest Node version in the CI release-check matrix.");
+  process.exit(1);
+}
 if (!pkg.bin || !pkg.scripts?.smoke || !pkg.scripts?.test) {
   console.error("package.json must expose bin, test, and smoke scripts.");
   process.exit(1);
