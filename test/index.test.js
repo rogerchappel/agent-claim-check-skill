@@ -745,6 +745,23 @@ describe("cli", () => {
     });
   }
 
+  it("emits fixture-backed SARIF 2.1.0 findings while preserving policy exits", () => {
+    const result = runCli(["--draft", "fixtures/draft.md", "--sources", "fixtures/sources.json", "--format", "sarif", "--fail-on", "missing"]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stderr, "");
+    const sarif = JSON.parse(result.stdout);
+    assert.equal(sarif.version, "2.1.0");
+    assert.equal(sarif.runs[0].tool.driver.name, "agent-claim-check");
+    assert.ok(sarif.runs[0].results.length > 0);
+    for (const finding of sarif.runs[0].results) {
+      assert.match(finding.ruleId, /^claim-check\/(supported|weak|missing|unverifiable)$/);
+      assert.ok(["none", "note", "warning"].includes(finding.level));
+      assert.equal(finding.locations[0].physicalLocation.artifactLocation.uri, "fixtures/draft.md");
+      assert.equal(typeof finding.properties.status, "string");
+    }
+    assert.equal(sarif.runs[0].results.find((finding) => finding.properties.status === "missing").level, "warning");
+  });
+
   for (const format of ["yaml", "MARKDOWN"]) {
     it(`rejects invalid --format value ${JSON.stringify(format)} before reading files`, () => {
       const result = runCli([
@@ -755,7 +772,7 @@ describe("cli", () => {
 
       assert.equal(result.status, 1);
       assert.equal(result.stdout, "");
-      assert.match(result.stderr, /Invalid value for --format: .*Expected markdown or json\./);
+      assert.match(result.stderr, /Invalid value for --format: .*Expected markdown, json, or sarif\./);
       assert.match(result.stderr, /Usage: agent-claim-check/);
       assert.doesNotMatch(result.stderr, /ENOENT/);
     });

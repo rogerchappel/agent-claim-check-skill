@@ -34,10 +34,16 @@ agent-claim-check \
 `--sources`, `--format`, and `--fail-on`) may be supplied only once and must be
 followed by a value, not another flag. `--help`/`-h` and `--version`/`-v` are
 standalone commands and cannot be mixed with operational options. Invalid CLI
-usage exits with status 1. `--format` accepts only `markdown` or `json`, while
+usage exits with status 1. `--format` accepts `markdown`, `json`, or opt-in `sarif`, while
 `--fail-on` may be omitted or set to `weak`, `missing`, or `unverifiable`.
 These option values are validated before either input file is read, and invalid
-usage produces only an actionable error and usage text on stderr. A report
+usage produces only an actionable error and usage text on stderr. SARIF output
+uses SARIF 2.1.0: supported claims are `none`, weak/unverifiable claims are
+`note`, and missing-evidence claims are `warning`. Each result includes the
+claim text, status, explanation, suggestion, evidence, and draft file location;
+no source content is treated as a file location. Unsupported statuses are
+omitted rather than promoted to errors. The default remains markdown and JSON
+output is unchanged. A report
 matching a valid selected `--fail-on` threshold exits with status 2.
 
 Drafts may use ordinary Markdown prose, blockquoted prose, structural headings,

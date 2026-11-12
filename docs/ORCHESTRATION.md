@@ -4,7 +4,7 @@
 
 - `draft`: local markdown or text path.
 - `sources`: local JSON source bundle path.
-- `format`: `markdown` or `json`.
+- `format`: `markdown`, `json`, or opt-in `sarif` (SARIF 2.1.0).
 - `failOn`: optional policy threshold.
 
 ## Recommended Run Step
