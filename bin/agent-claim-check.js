@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { checkDraft, readSources, readText, renderJson, renderMarkdown, shouldFail } from "../src/index.js";
+import { renderSarif } from "../src/sarif.js";
 
 function packageVersion() {
   const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
@@ -41,12 +42,12 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  return `Usage: agent-claim-check --draft <file> --sources <file> [--format markdown|json] [--fail-on weak|missing|unverifiable]\n`;
+  return `Usage: agent-claim-check --draft <file> --sources <file> [--format markdown|json|sarif] [--fail-on weak|missing|unverifiable]\n`;
 }
 
 function validateArgs(args) {
-  if (!new Set(["markdown", "json"]).has(args.format)) {
-    throw new Error(`Invalid value for --format: ${args.format}. Expected markdown or json.`);
+  if (!new Set(["markdown", "json", "sarif"]).has(args.format)) {
+    throw new Error(`Invalid value for --format: ${args.format}. Expected markdown, json, or sarif.`);
   }
   if (!new Set(["", "weak", "missing", "unverifiable"]).has(args.failOn)) {
     throw new Error(`Invalid value for --fail-on: ${args.failOn}. Expected weak, missing, or unverifiable.`);
@@ -69,6 +70,7 @@ try {
   }
   const report = checkDraft(readText(args.draft), readSources(args.sources));
   if (args.format === "json") process.stdout.write(renderJson(report));
+  else if (args.format === "sarif") process.stdout.write(renderSarif(report, args.draft));
   else process.stdout.write(renderMarkdown(report));
   process.exit(shouldFail(report, args.failOn) ? 2 : 0);
 } catch (error) {
