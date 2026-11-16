@@ -105,7 +105,8 @@ npm run release:check
 ```
 
 Pull requests and pushes to `main` run the same release gate in GitHub Actions
-on Node.js 20, 22, and 24.
+on Node.js 20, 22, 24, and 26. The declared support floor is Node.js 20, and CI tests every supported major
+currently covered by the release matrix.
 
 ## Package contents
 
