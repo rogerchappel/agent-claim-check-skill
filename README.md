@@ -94,15 +94,14 @@ claims are classified, with the zero-based source index and field in the error.
 
 ## Verify
 
-Run the release-readiness check before promoting the package:
+Run the non-publishing release-readiness checklist before preparing a release:
 
-```bash
-npm run check
-npm test
-npm run smoke
-npm run package:smoke
-npm run release:check
-```
+1. Confirm `package.json` has the intended name and version, a supported `engines.node` floor, a license, repository/homepage/bugs links, and a deliberate `files` allowlist.
+2. Run the complete local gate: `npm ci && npm run release:check`.
+3. Confirm the package smoke test inspects `npm pack --json` contents, checks required metadata files, installs that exact tarball into a disposable prefix, and runs the installed CLI's help and version commands.
+4. Review the generated package file list and test results for unexpected or missing files; resolve discrepancies before publishing.
+
+These checks only build and install a temporary local package artifact. They do not invoke `npm publish` or publish to any registry. `npm run release:check` runs the static check, tests, CLI smoke, and package smoke in sequence.
 
 Pull requests and pushes to `main` run the same release gate in GitHub Actions
 on Node.js 20, 22, 24, and 26. The declared support floor is Node.js 20, and CI tests every supported major
