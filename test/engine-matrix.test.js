@@ -12,7 +12,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 test("release check rejects an engine floor that differs from CI's lowest Node", () => {
   const temp = mkdtempSync(join(tmpdir(), "engine-matrix-"));
   try {
-    for (const path of ["scripts/check.js", ".github/workflows/ci.yml", "package.json", "README.md", "SKILL.md", "package-lock.json", "docs/PRD.md", "docs/TASKS.md", "docs/ORCHESTRATION.md", "docs/RELEASE_CANDIDATE.md", "src/index.js", "bin/agent-claim-check.js", "fixtures/draft.md", "fixtures/sources.json", "test/index.test.js"]) {
+    for (const path of ["scripts/check.js", ".github/workflows/ci.yml", "package.json", "README.md", "SKILL.md", "package-lock.json", "docs/PRD.md", "docs/TASKS.md", "docs/ORCHESTRATION.md", "docs/RELEASE_CANDIDATE.md", "src/index.js", "bin/agent-claim-check.js", "fixtures/draft.md", "fixtures/sources.json", "test/index.test.js", "test/engine-matrix.test.js"]) {
       const target = join(temp, path);
       cpSync(join(root, path), target, { recursive: true });
     }
